@@ -9,6 +9,9 @@
 #define _countof(a) (sizeof(a) / sizeof(a[0]))
 #endif
 
+#define PAD_X 5
+#define PAD_Y 0
+
 const int *Slot::symbolIndices;
 int Slot::reelLength;
 int Slot::reelHeight;
@@ -16,13 +19,10 @@ int Slot::shadowHeight;
 uint8_t *Slot::shadowBrigtness;
 uint16_t *Slot::buffer;
 
-#define PAD_X 2
-#define PAD_Y 0
-
 void Slot::init(int unit, int _index) {
 	index = _index;
-	posX = (M5.Lcd.width() - (SYM_WIDTH * SLOT_COUNT + PAD_X * (SLOT_COUNT - 1))) / 2 + unit * (SYM_WIDTH + PAD_X);
-	height = M5.Lcd.height() - PAD_Y * 2;
+	posX = (StickCP2.Display.width() - (SYM_WIDTH * SLOT_COUNT + PAD_X * (SLOT_COUNT - 1))) / 2 + unit * (SYM_WIDTH + PAD_X);
+	height = StickCP2.Display.height() - PAD_Y * 2;
 	degree = (float)(index * 360 / reelLength);
 	vel = acc = 0;
 	state = SLOT_INIT;
@@ -66,12 +66,12 @@ void Slot::draw() {
 				int sy = i / SYM_WIDTH;
 				*q++ = darker(*data++, shadowBrigtness[(y < shadowHeight) ? sy + shadowY : shadowHeight - sy - shadowY - 1]);
 			}
-			M5.Lcd.pushImage(x, y + PAD_Y, SYM_WIDTH, sh, buffer);
+			StickCP2.Display.pushImage(x, y + PAD_Y, SYM_WIDTH, sh, buffer);
 			shadowY += sh;
 			h = sh;
 		} else {
 			shadowY = 0;
-			M5.Lcd.pushImage(x, y + PAD_Y, SYM_WIDTH, h, data);
+			StickCP2.Display.pushImage(x, y + PAD_Y, SYM_WIDTH, h, data);
 		}
 		offset += h;
 		y += h;
@@ -80,14 +80,14 @@ void Slot::draw() {
 
 void Slot::flush(uint16_t bgColor) {
 	int x = posX;
-	int y = (M5.Lcd.height() - SYM_HEIGHT) / 2;
+	int y = (StickCP2.Display.height() - SYM_HEIGHT) / 2;
 	Serial.print("flush:");Serial.println(index);
 	const uint16_t* data = slot_symbols[symbolIndices[index]];
 	if (bgColor == TFT_WHITE) {
-		M5.Lcd.pushImage(x, y, SYM_WIDTH, SYM_HEIGHT, data);
+		StickCP2.Display.pushImage(x, y, SYM_WIDTH, SYM_HEIGHT, data);
 	} else {
-		M5.Lcd.fillRect(x, y, SYM_WIDTH, SYM_HEIGHT, bgColor);
-		M5.Lcd.pushImage(x, y, SYM_WIDTH, SYM_HEIGHT, data, TFT_WHITE);
+		StickCP2.Display.fillRect(x, y, SYM_WIDTH, SYM_HEIGHT, bgColor);
+		StickCP2.Display.pushImage(x, y, SYM_WIDTH, SYM_HEIGHT, data, TFT_WHITE);
 	}
 }
 
@@ -148,6 +148,10 @@ bool Slot::update() {
 // edge shadow
 //
 void Slot::initShadow(int _shadowHeight) {
+	StickCP2.Display.init();
+	StickCP2.Display.setRotation(3);
+    StickCP2.Display.fillScreen(TFT_BLACK);
+    StickCP2.Display.setSwapBytes(true);
 	shadowHeight = _shadowHeight;
 	shadowBrigtness = (uint8_t*)malloc(shadowHeight);
 	buffer = (uint16_t*)malloc(SYM_WIDTH * shadowHeight * sizeof(uint16_t));

@@ -3,7 +3,7 @@
 //
 #pragma once
 
-#include <M5StickC.h>
+#include "M5StickCPlus2.h"
 
 #define SLOT_COUNT 3
 
@@ -46,3 +46,4 @@ private:
 	static uint8_t calcBrightness(float step);
 	static float sigmoid(float t);
 };
+
