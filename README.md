@@ -14,3 +14,6 @@ With librarys:
 - m5stack/M5StickCPlus2@^1.0.2
 
 Change Images to 75x75 (pixel)
+
+Demo Display：  
+![Slot_Demo](Slot_Demo.gif)
