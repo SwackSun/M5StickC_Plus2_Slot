@@ -1,6 +1,6 @@
 #include "Arduino.h"
 #include "Slot.h"
-#include "image_qcsj.h"
+#include "image_logo.h"
 
 #ifndef _countof
 #define _countof(a) (sizeof(a) / sizeof(a[0]))
@@ -16,17 +16,25 @@ const int symbolIndices[] = { 2, 4, 3, 0, 1, 5, 3 };
 enum SlotsState { SLOTS_INIT, SLOTS_START, SLOTS_STOP = SLOT_COUNT + 1, SLOTS_FLUSH };
 int state = SLOTS_INIT;
 
+unsigned long startTime;
+const unsigned long timeoutDuration = 3000;
+
 void setup() {
 	auto cfg = M5.config();
     StickCP2.begin(cfg);
 
 	Serial.begin(115200);
-
-	StickCP2.Display.pushImage(0, 0, 135, 240, (uint16_t*)gImage_qcsj, TFT_WHITE);
+	startTime = millis();
+	StickCP2.Display.pushImage(0, 0, 135, 240, (uint16_t*)gImage_logo, TFT_WHITE);
 	while(true)
 	{
 		StickCP2.update();
 		if (StickCP2.BtnA.wasPressed()) {
+			break;
+		}
+		if (millis() - startTime >= timeoutDuration) 
+		{
+			// Timeout, exit loop
 			break;
 		}
 	}
